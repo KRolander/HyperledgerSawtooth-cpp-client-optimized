@@ -1,3 +1,8 @@
+
+
+#ifndef SAWTOOTH_CLIENT
+#define SAWTOOTH_CLIENT
+
 //////////////////////////////////////////////////////////////////
 //To show errors:
 void abort(void) __THROW __attribute__((__noreturn__));
@@ -67,30 +72,30 @@ using CryptoPP::StringSource;
 #include "trezorCrypto/bignum.h"
 //////////////////////////////////////////////////////////////////
 
-#ifndef SAWTOOTH_CLIENT
-#define SAWTOOTH_CLIENT
+static char HexLookUp[] = "0123456789abcdef";
+
 
 struct SawtoothKeys
 {
     std::string privKey = PRIVATE_KEY;
     std::string pubKey = PUBLIC_KEY;
-    SECP256K1_API::secp256k1_pubkey publicKey;
-    unsigned char privateKey[PRIVATE_KEY_SIZE];
-    unsigned char publicKey_serilized[PUBLIC_KEY_SERILIZED_SIZE];
+    uint8_t privateKey[PRIVATE_KEY_SIZE];
+    uint8_t publicKey_serilized[PUBLIC_KEY_SERILIZED_SIZE];
 };
+
 
 struct SawtoothSigature
 {
-    SECP256K1_API::secp256k1_ecdsa_signature signature;
     std::string signature_serilized_str = "";
-    unsigned char signature_serilized[SIGNATURE_SERILIZED_SIZE];
+    uint8_t signature_serilized[SIGNATURE_SERILIZED_SIZE];
 };
+
 
 struct SawtoothMessage
 {
     std::string message = "";
     std::string message_hash_str = "";
-    unsigned char message_hash_char[HASH_SHA256_SIZE];
+    uint8_t message_hash_char[HASH_SHA256_SIZE];
 };
 
 std::string UcharToHexStr(unsigned char *data, int len);
@@ -104,14 +109,21 @@ std::string ToHex(std::string s, bool upper_case);
 void buildIntkeyAddress(std::string txnFamily, std::string entryName, unsigned char *ouput35bytes);
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
 int sendData(std::string data, std::string api_endpoint);
-int LoadKeys(
-    SECP256K1_API::secp256k1_context *ctx,
-    SawtoothKeys &Keys);
-int GenerateKeyPair(
-    SECP256K1_API::secp256k1_context *ctx,
-    SawtoothKeys &Keys);
+// int LoadKeys(
+//     SECP256K1_API::secp256k1_context *ctx,
+//     SawtoothKeys &Keys);
+// int GenerateKeyPair(
+//     SECP256K1_API::secp256k1_context *ctx,
+//     SawtoothKeys &Keys);
 void printProtoJson(google::protobuf::Message &message);
 
+// ECDSA Signature with Trezor crypto library
 void SignTresor(uint8_t *hash, uint8_t *sig, uint8_t * privateKey, int *recid);
+
+// Convert uint8_t array to hexa string
+void singleBytes2hex(unsigned char *src, char *out);
+
+// Convert hexa string to uint8_t array
+void hexStringToUint8_t(uint8_t *dest, const char *source, int bytes_n);
 
 #endif

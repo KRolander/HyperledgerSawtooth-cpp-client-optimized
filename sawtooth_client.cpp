@@ -6,10 +6,9 @@
 
 #include "sawtooth_client.h"
 
-
 //https://stackoverflow.com/a/14051107/11697589
 //https://stackoverflow.com/questions/7639656/getting-a-buffer-into-a-stringstream-in-hex-representation/7639754#7639754
-std::string UcharToHexStr(unsigned char *data, int len) //bytes to string
+std::string UcharToHexStr(unsigned char *data, int len)
 {
     //this was first:
     // std::stringstream ss;
@@ -206,87 +205,87 @@ int sendData(std::string data, std::string api_endpoint)
     }
 }
 
-int LoadKeys(
-    SECP256K1_API::secp256k1_context *ctx,
-     SawtoothKeys &Keys)
-{
-    if (Keys.pubKey.length() > 0 && Keys.privKey.length() > 0)
-    {
-        //std::cout << "Using default private and public keys." << std::endl;
-        /* LOAD public keys */
-        {
-            unsigned char pubkey_char[PUBLIC_KEY_SERILIZED_SIZE];
-            HexStrToUchar(pubkey_char, Keys.pubKey.c_str(), (size_t)PUBLIC_KEY_SERILIZED_SIZE);
-            if (VERBOSE)
-                std::cout << "Parse Public key:" << UcharToHexStr(pubkey_char, PUBLIC_KEY_SERILIZED_SIZE) << std::endl;
-            CHECK(SECP256K1_API::secp256k1_ec_pubkey_parse(ctx, &Keys.publicKey, pubkey_char, PUBLIC_KEY_SERILIZED_SIZE) == 1);
-            if (VERBOSE)
-                std::cout << "Ok." << std::endl;
-        }
-        /* LOAD private keys */
-        {
-            HexStrToUchar(Keys.privateKey, Keys.privKey.c_str(), (size_t)PRIVATE_KEY_SIZE);
-            if (VERBOSE)
-                std::cout << "Parse private key:" << UcharToHexStr(Keys.privateKey, PRIVATE_KEY_SIZE) << std::endl;
-            CHECK(SECP256K1_API::secp256k1_ec_seckey_verify(ctx, Keys.privateKey) == 1);
-            if (VERBOSE)
-                std::cout << "Ok." << std::endl;
-        }
-        return 1;
-    }
-    else
-    {
-        std::cerr << "ERROR: No keys loaded. Please verify that you have given keys." << std::endl;
-        return 0;
-    }
-}
+// int LoadKeys(
+//     SECP256K1_API::secp256k1_context *ctx,
+//      SawtoothKeys &Keys)
+// {
+//     if (Keys.pubKey.length() > 0 && Keys.privKey.length() > 0)
+//     {
+//         //std::cout << "Using default private and public keys." << std::endl;
+//         /* LOAD public keys */
+//         {
+//             unsigned char pubkey_char[PUBLIC_KEY_SERILIZED_SIZE];
+//             HexStrToUchar(pubkey_char, Keys.pubKey.c_str(), (size_t)PUBLIC_KEY_SERILIZED_SIZE);
+//             if (VERBOSE)
+//                 std::cout << "Parse Public key:" << UcharToHexStr(pubkey_char, PUBLIC_KEY_SERILIZED_SIZE) << std::endl;
+//             CHECK(SECP256K1_API::secp256k1_ec_pubkey_parse(ctx, &Keys.publicKey, pubkey_char, PUBLIC_KEY_SERILIZED_SIZE) == 1);
+//             if (VERBOSE)
+//                 std::cout << "Ok." << std::endl;
+//         }
+//         /* LOAD private keys */
+//         {
+//             HexStrToUchar(Keys.privateKey, Keys.privKey.c_str(), (size_t)PRIVATE_KEY_SIZE);
+//             if (VERBOSE)
+//                 std::cout << "Parse private key:" << UcharToHexStr(Keys.privateKey, PRIVATE_KEY_SIZE) << std::endl;
+//             CHECK(SECP256K1_API::secp256k1_ec_seckey_verify(ctx, Keys.privateKey) == 1);
+//             if (VERBOSE)
+//                 std::cout << "Ok." << std::endl;
+//         }
+//         return 1;
+//     }
+//     else
+//     {
+//         std::cerr << "ERROR: No keys loaded. Please verify that you have given keys." << std::endl;
+//         return 0;
+//     }
+// }
 
-int GenerateKeyPair(
-    SECP256K1_API::secp256k1_context *ctx,
-     SawtoothKeys &Keys)
-{
-    /* Generate a random key */
-    {
-        emptyBytes(Keys.privateKey, PRIVATE_KEY_SIZE);
-        generateRandomBytes(Keys.privateKey, PRIVATE_KEY_SIZE);
-        Keys.privKey = UcharToHexStr(Keys.privateKey, PRIVATE_KEY_SIZE);
-        if (VERBOSE)
-                std::cout << "generatePrivateKey: " << Keys.privKey << std::endl;
-        while (SECP256K1_API::secp256k1_ec_seckey_verify(ctx, Keys.privateKey) == 0) //regenerate private key until it is valid
-        {
-            generateRandomBytes(Keys.privateKey, PRIVATE_KEY_SIZE);
-            Keys.privKey = UcharToHexStr(Keys.privateKey, PRIVATE_KEY_SIZE);
-            std::cout << "generatePrivateKey: " << Keys.privKey << std::endl;
-        }
-        CHECK(SECP256K1_API::secp256k1_ec_seckey_verify(ctx, Keys.privateKey) == 1);
-        if (VERBOSE)
-            std::cout << "Private key verified.\n->Using:" << Keys.privKey << std::endl;
-    }
+// int GenerateKeyPair(
+//     SECP256K1_API::secp256k1_context *ctx,
+//      SawtoothKeys &Keys)
+// {
+//     /* Generate a random key */
+//     {
+//         emptyBytes(Keys.privateKey, PRIVATE_KEY_SIZE);
+//         generateRandomBytes(Keys.privateKey, PRIVATE_KEY_SIZE);
+//         Keys.privKey = UcharToHexStr(Keys.privateKey, PRIVATE_KEY_SIZE);
+//         if (VERBOSE)
+//                 std::cout << "generatePrivateKey: " << Keys.privKey << std::endl;
+//         while (SECP256K1_API::secp256k1_ec_seckey_verify(ctx, Keys.privateKey) == 0) //regenerate private key until it is valid
+//         {
+//             generateRandomBytes(Keys.privateKey, PRIVATE_KEY_SIZE);
+//             Keys.privKey = UcharToHexStr(Keys.privateKey, PRIVATE_KEY_SIZE);
+//             std::cout << "generatePrivateKey: " << Keys.privKey << std::endl;
+//         }
+//         CHECK(SECP256K1_API::secp256k1_ec_seckey_verify(ctx, Keys.privateKey) == 1);
+//         if (VERBOSE)
+//             std::cout << "Private key verified.\n->Using:" << Keys.privKey << std::endl;
+//     }
 
-    /* Generate a public key */
-    {
-        emptyBytes(Keys.publicKey.data, PUBLIC_KEY_SIZE);
-        //FAILING:Segmentation fault
-        CHECK(SECP256K1_API::secp256k1_ec_pubkey_create(ctx, &Keys.publicKey, Keys.privateKey) == 1);
-        if (VERBOSE)
-            std::cout << "Public key verified." << std::endl;
-        if (VERBOSE)
-            std::cout << "->Using:" << UcharToHexStr(Keys.publicKey.data, PUBLIC_KEY_SIZE) << std::endl;
-    }
+//     /* Generate a public key */
+//     {
+//         emptyBytes(Keys.publicKey.data, PUBLIC_KEY_SIZE);
+//         //FAILING:Segmentation fault
+//         CHECK(SECP256K1_API::secp256k1_ec_pubkey_create(ctx, &Keys.publicKey, Keys.privateKey) == 1);
+//         if (VERBOSE)
+//             std::cout << "Public key verified." << std::endl;
+//         if (VERBOSE)
+//             std::cout << "->Using:" << UcharToHexStr(Keys.publicKey.data, PUBLIC_KEY_SIZE) << std::endl;
+//     }
 
-    /* Serilize public key */
-    {
-        emptyBytes(Keys.publicKey_serilized, PUBLIC_KEY_SERILIZED_SIZE);
-        size_t pub_key_ser_size = PUBLIC_KEY_SERILIZED_SIZE;
-        CHECK(SECP256K1_API::secp256k1_ec_pubkey_serialize(ctx, Keys.publicKey_serilized, &pub_key_ser_size, &Keys.publicKey, SECP256K1_EC_COMPRESSED) == 1);
-        Keys.pubKey = UcharToHexStr(Keys.publicKey_serilized, PUBLIC_KEY_SERILIZED_SIZE);
-        if (VERBOSE)
-            std::cout << "Public key serilized ok." << std::endl;
-        if (VERBOSE)
-            std::cout << "->Using:" << Keys.pubKey << std::endl;
-    }
-    return 1;
-}
+//     /* Serilize public key */
+//     {
+//         emptyBytes(Keys.publicKey_serilized, PUBLIC_KEY_SERILIZED_SIZE);
+//         size_t pub_key_ser_size = PUBLIC_KEY_SERILIZED_SIZE;
+//         CHECK(SECP256K1_API::secp256k1_ec_pubkey_serialize(ctx, Keys.publicKey_serilized, &pub_key_ser_size, &Keys.publicKey, SECP256K1_EC_COMPRESSED) == 1);
+//         Keys.pubKey = UcharToHexStr(Keys.publicKey_serilized, PUBLIC_KEY_SERILIZED_SIZE);
+//         if (VERBOSE)
+//             std::cout << "Public key serilized ok." << std::endl;
+//         if (VERBOSE)
+//             std::cout << "->Using:" << Keys.pubKey << std::endl;
+//     }
+//     return 1;
+// }
 
 void SignTresor(uint8_t *hash, uint8_t *sig, uint8_t * privateKey ,int *recid)
 {
@@ -296,4 +295,207 @@ void SignTresor(uint8_t *hash, uint8_t *sig, uint8_t * privateKey ,int *recid)
     int ok = ecdsa_sign_digest(curve, privateKey, hash, sig, &py, NULL);
 
     recid[0] = py;
+}
+
+void bytes2hex(unsigned char *src, char *out, int len)
+{
+    while (len--)
+    {
+        *out++ = HexLookUp[*src >> 4];
+        *out++ = HexLookUp[*src & 0x0F];
+        src++;
+    }
+    *out = 0;
+}
+
+
+void hexStringToUint8_t(uint8_t *dest, const char *source, int bytes_n)
+{
+
+    int i;
+    int j = 0;
+    for (i = 0; i < bytes_n; i++)
+    {
+        if (source[j] == '0')
+        {
+            dest[i] = 0; //0x00
+        }
+        else if (source[j] == '1')
+        {
+            dest[i] = 16; // 0x10
+        }
+        else if (source[j] == '2')
+        {
+            dest[i] = 32; // 0x20
+        }
+        else if (source[j] == '3')
+        {
+            dest[i] = 48; // 0x30
+        }
+        else if (source[j] == '4')
+        {
+            dest[i] = 64; // 0x40
+        }
+        else if (source[j] == '5')
+        {
+            dest[i] = 80; // 0x50
+        }
+        else if (source[j] == '6')
+        {
+            dest[i] = 96; // 0x60
+        }
+        else if (source[j] == '7')
+        {
+            dest[i] = 112; // 0x70
+        }
+        else if (source[j] == '8')
+        {
+            dest[i] = 128; // 0x80
+        }
+        else if (source[j] == '9')
+        {
+            dest[i] = 144; // 0x90
+        }
+        else if (source[j] == 'a')
+        {
+            dest[i] = 160; // 0xa0
+        }
+        else if (source[j] == 'b')
+        {
+            dest[i] = 176; // 0xb0
+        }
+        else if (source[j] == 'c')
+        {
+            dest[i] = 192; // 0xc0
+        }
+        else if (source[j] == 'd')
+        {
+            dest[i] = 208; // 0xd0
+        }
+        else if (source[j] == 'e')
+        {
+            dest[i] = 224; // 0xe0
+        }
+        else if (source[j] == 'f')
+        {
+            dest[i] = 240; // 0xf0
+        }
+        else if (source[j] == 'A')
+        {
+            dest[i] = 160; // 0xa0
+        }
+        else if (source[j] == 'B')
+        {
+            dest[i] = 176; // 0xb0
+        }
+        else if (source[j] == 'C')
+        {
+            dest[i] = 192; // 0xc0
+        }
+        else if (source[j] == 'D')
+        {
+            dest[i] = 208; // 0xd0
+        }
+        else if (source[j] == 'E')
+        {
+            dest[i] = 224; // 0xe0
+        }
+        else if (source[j] == 'F')
+        {
+            dest[i] = 240; // 0xf0
+        }
+
+        j++;
+
+        if (source[j] == '0')
+        {
+            dest[i] = (dest[i] | 0x00);
+        }
+        else if (source[j] == '1')
+        {
+            dest[i] = (dest[i] | 0x01);
+        }
+        else if (source[j] == '2')
+        {
+            dest[i] = (dest[i] | 0x02);
+        }
+        else if (source[j] == '3')
+        {
+            dest[i] = (dest[i] | 0x03);
+        }
+        else if (source[j] == '4')
+        {
+            dest[i] = (dest[i] | 0x04);
+        }
+        else if (source[j] == '5')
+        {
+            dest[i] = (dest[i] | 0x05);
+        }
+        else if (source[j] == '6')
+        {
+            dest[i] = (dest[i] | 0x06);
+        }
+        else if (source[j] == '7')
+        {
+            dest[i] = (dest[i] | 0x07);
+        }
+        else if (source[j] == '8')
+        {
+            dest[i] = (dest[i] | 0x08);
+        }
+        else if (source[j] == '9')
+        {
+            dest[i] = (dest[i] | 0x09);
+        }
+        else if (source[j] == 'a')
+        {
+            dest[i] = (dest[i] | 0x0a);
+        }
+        else if (source[j] == 'b')
+        {
+            dest[i] = (dest[i] | 0x0b);
+        }
+        else if (source[j] == 'c')
+        {
+            dest[i] = (dest[i] | 0x0c);
+        }
+        else if (source[j] == 'd')
+        {
+            dest[i] = (dest[i] | 0x0d);
+        }
+        else if (source[j] == 'e')
+        {
+            dest[i] = (dest[i] | 0x0e);
+        }
+        else if (source[j] == 'f')
+        {
+            dest[i] = (dest[i] | 0x0f);
+        }
+        else if (source[j] == 'A')
+        {
+            dest[i] = (dest[i] | 0x0a);
+        }
+        else if (source[j] == 'B')
+        {
+            dest[i] = (dest[i] | 0x0b);
+        }
+        else if (source[j] == 'C')
+        {
+            dest[i] = (dest[i] | 0x0c);
+        }
+        else if (source[j] == 'D')
+        {
+            dest[i] = (dest[i] | 0x0d);
+        }
+        else if (source[j] == 'E')
+        {
+            dest[i] = (dest[i] | 0x0e);
+        }
+        else if (source[j] == 'F')
+        {
+            dest[i] = (dest[i] | 0x0f);
+        }
+
+        j++;
+    }
 }

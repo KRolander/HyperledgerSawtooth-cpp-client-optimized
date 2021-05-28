@@ -79,28 +79,33 @@ int parseArgs(int argc, char *argv[], std::string &command, std::string &subcomm
     }
 }
 
-void init_transaction(SECP256K1_API::secp256k1_context *&ctx,
-                      json &payload,
+void init_transaction(json &payload,
                       SawtoothKeys &TnxKeys,
                       SawtoothMessage &TnxMsg,
                       std::string subcommand)
 {
-    ctx = SECP256K1_API::secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
     std::cout << "***Loading keys***" << std::endl;
     //Change in .h if you want auto generated keys
-    if (LOAD_DEFAULT_KEYS)
-    {
-        //load default keys
-        CHECK(LoadKeys(ctx, TnxKeys) == 1);
-    }
-    else
-    {
-        std::cout << "***Generating keys***" << std::endl;
-        GenerateKeyPair(ctx, TnxKeys);
-        std::cout << std::left;
-        std::cout << std::setw(15) << "Private Key: " << TnxKeys.privKey << std::endl;
-        std::cout << std::setw(15) << "Public Key: " << TnxKeys.pubKey << std::endl;
-    }
+
+
+    // TODO with trezor crypto
+    
+    HexStrToUchar(TnxKeys.privateKey, TnxKeys.privKey.c_str(), PRIVATE_KEY_SIZE);
+    HexStrToUchar(TnxKeys.publicKey_serilized, TnxKeys.pubKey.c_str(), PUBLIC_KEY_SERILIZED_SIZE);
+
+    // if (LOAD_DEFAULT_KEYS)
+    // {
+    //     //load default keys
+    //     CHECK(LoadKeys(ctx, TnxKeys) == 1);
+    // }
+    // else
+    // {
+    //     std::cout << "***Generating keys***" << std::endl;
+    //     GenerateKeyPair(ctx, TnxKeys);
+    //     std::cout << std::left;
+    //     std::cout << std::setw(15) << "Private Key: " << TnxKeys.privKey << std::endl;
+    //     std::cout << std::setw(15) << "Public Key: " << TnxKeys.pubKey << std::endl;
+    // }
 
     std::cout << "***Build payload***" << std::endl;
     payload["Verb"] = subcommand;
@@ -111,8 +116,7 @@ void init_transaction(SECP256K1_API::secp256k1_context *&ctx,
     TnxMsg.message = payload_str; //set final message
 }
 
-void build_signature(SECP256K1_API::secp256k1_context *&ctx,
-                     json &payload,
+void build_signature(json &payload,
                      SawtoothKeys &TnxKeys,
                      SawtoothMessage &TnxMsg,
                      SawtoothSigature &TnxSig,
@@ -131,7 +135,7 @@ void build_signature(SECP256K1_API::secp256k1_context *&ctx,
     size_t nonce_size = 10;
     unsigned char Transactionnonce[nonce_size];
     generateRandomBytes(Transactionnonce, nonce_size);
-    std::string TxnNonce = UcharToHexStr(Transactionnonce, nonce_size);
+    std::string TxnNonce = "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a";//UcharToHexStr(Transactionnonce, nonce_size);
 
     TnxMsg.message_hash_str = sha512Data(TnxMsg.message);
     unsigned char address[35];
@@ -162,33 +166,14 @@ void build_signature(SECP256K1_API::secp256k1_context *&ctx,
     if (VERBOSE)
         std::cout << "message_hash_str: " << TnxMsg.message_hash_str << std::endl;
     HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
-   
-
-    uint8_t signatureTrezor[SIGNATURE_SERILIZED_SIZE];
+    
     int recid[1] = {0};
-    SignTresor((uint8_t *) TnxMsg.message_hash_char, signatureTrezor, (uint8_t*) TnxKeys.privateKey , recid);
+    SignTresor((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
     int i;
     std::cout << "Trezor Crypto signature Transaction: " << std::endl;
     std::cout << "r : " << std::endl;
     for(i=0; i<32; i++)
     {
-        std::cout << std::hex << (uint32_t) signatureTrezor[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "s : " << std::endl;
-    for(i=32; i<64; i++)
-    {
-        std::cout << std::hex << (uint32_t) signatureTrezor[i] << " ";
-    }
-    std::cout << std::endl;
-
-    CHECK(SECP256K1_API::secp256k1_ecdsa_sign(ctx, &TnxSig.signature, TnxMsg.message_hash_char, TnxKeys.privateKey, NULL, NULL) == 1); //make signature
-    CHECK(SECP256K1_API::secp256k1_ecdsa_signature_serialize_compact(ctx, TnxSig.signature_serilized, &TnxSig.signature) == 1);
-
-    std::cout << "Secp256k1 signature Trnasaction: " << std::endl;
-    std::cout << "r : " << std::endl;
-    for(i=0; i<32; i++)
-    {
         std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
     }
     std::cout << std::endl;
@@ -198,9 +183,31 @@ void build_signature(SECP256K1_API::secp256k1_context *&ctx,
         std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
     }
     std::cout << std::endl;
-   
+
+    // CHECK(SECP256K1_API::secp256k1_ecdsa_sign(ctx, &TnxSig.signature, TnxMsg.message_hash_char, TnxKeys.privateKey, NULL, NULL) == 1); //make signature
+    // CHECK(SECP256K1_API::secp256k1_ecdsa_signature_serialize_compact(ctx, TnxSig.signature_serilized, &TnxSig.signature) == 1);
+
+    // std::cout << "Secp256k1 signature Trnasaction: " << std::endl;
+    // std::cout << "r : " << std::endl;
+    // for(i=0; i<32; i++)
+    // {
+    //     std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "s : " << std::endl;
+    // for(i=32; i<64; i++)
+    // {
+    //     std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
+    // }
+    // std::cout << std::endl;
+ 
+    // std::string serializedSignatureTrezorFirst = UcharToHexStr(signatureTrezor, SIGNATURE_SERILIZED_SIZE);
+    
+    // std::cout << "Trezor serialized : " << serializedSignatureTrezorFirst << std::endl;
+
     TnxSig.signature_serilized_str = UcharToHexStr(TnxSig.signature_serilized, SIGNATURE_SERILIZED_SIZE);
-    std::cout << "Signature : " << TnxSig.signature_serilized_str << std::endl;
+    std::cout << "Trezor serialized : " << TnxSig.signature_serilized_str << std::endl;
+   
 
     myTransaction->set_header_signature(TnxSig.signature_serilized_str); //set header signature
 
@@ -221,40 +228,33 @@ void build_signature(SECP256K1_API::secp256k1_context *&ctx,
     TnxMsg.message_hash_str = sha256Data(myBatchHeader_string);
     HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
 
-    SignTresor((uint8_t *) TnxMsg.message_hash_char, signatureTrezor, (uint8_t*) TnxKeys.privateKey , recid);
 
-    std::cout << "Trezor Crypto signature BatchHeader : " << std::endl;
-    std::cout << "r : " << std::endl;
-    for(i=0; i<32; i++)
-    {
-        std::cout << std::hex << (uint32_t) signatureTrezor[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "s : " << std::endl;
-    for(i=32; i<64; i++)
-    {
-        std::cout << std::hex << (uint32_t) signatureTrezor[i] << " ";
-    }
-    std::cout << std::endl;
 
-    CHECK(SECP256K1_API::secp256k1_ecdsa_sign(ctx, &TnxSig.signature, TnxMsg.message_hash_char, TnxKeys.privateKey, NULL, NULL) == 1); //make signature
-    CHECK(SECP256K1_API::secp256k1_ecdsa_signature_serialize_compact(ctx, TnxSig.signature_serilized, &TnxSig.signature) == 1);
+    SignTresor((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
 
-    std::cout << "Secp256k1 signature BatchHeader: " << std::endl;
-    std::cout << "r : " << std::endl;
-    for(i=0; i<32; i++)
-    {
-        std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "s : " << std::endl;
-    for(i=32; i<64; i++)
-    {
-        std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
-    }
-    std::cout << std::endl;
+
+    // CHECK(SECP256K1_API::secp256k1_ecdsa_sign(ctx, &TnxSig.signature, TnxMsg.message_hash_char, TnxKeys.privateKey, NULL, NULL) == 1); //make signature
+    // CHECK(SECP256K1_API::secp256k1_ecdsa_signature_serialize_compact(ctx, TnxSig.signature_serilized, &TnxSig.signature) == 1);
+
+    // std::cout << "Secp256k1 signature BatchHeader: " << std::endl;
+    // std::cout << "r : " << std::endl;
+    // for(i=0; i<32; i++)
+    // {
+    //     std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "s : " << std::endl;
+    // for(i=32; i<64; i++)
+    // {
+    //     std::cout << std::hex << (uint32_t) TnxSig.signature_serilized[i] << " ";
+    // }
+    // std::cout << std::endl;
+
+    // std::string serializedSigTrezor = UcharToHexStr(signatureTrezor, SIGNATURE_SERILIZED_SIZE);
+    // std::cout << "Trezor serialized : " << serializedSigTrezor << std::endl;
 
     TnxSig.signature_serilized_str = UcharToHexStr(TnxSig.signature_serilized, SIGNATURE_SERILIZED_SIZE);
+    std::cout << "Trezor serialized : " << TnxSig.signature_serilized_str << std::endl;
 
     myBatch->set_header_signature(TnxSig.signature_serilized_str);
 
@@ -291,37 +291,38 @@ void send_transaction(std::string data_to_send, std::string command)
     }
 }
 
-void clear_program(SECP256K1_API::secp256k1_context *ctx)
-{
-    SECP256K1_API::secp256k1_context_destroy(ctx);
-}
+// void clear_program(SECP256K1_API::secp256k1_context *ctx)
+// {
+//     SECP256K1_API::secp256k1_context_destroy(ctx);
+// }
 //////////////////////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    std::chrono::steady_clock::time_point end;
+    // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    // std::chrono::steady_clock::time_point end;
     std::string command = "", subcommand = "";
     if (int exit = parseArgs(argc, argv, command, subcommand))
         return exit;
 
     std::cout << "***Initialization***" << std::endl;
-    static SECP256K1_API::secp256k1_context *ctx;
+    // static SECP256K1_API::secp256k1_context *ctx;
     json payload;
 
     SawtoothMessage TnxMsg;
     SawtoothKeys TnxKeys;
     SawtoothSigature TnxSig;
 
-    init_transaction(ctx, payload, TnxKeys, TnxMsg, subcommand);
+    init_transaction(payload, TnxKeys, TnxMsg, subcommand);
 
     std::string data_to_send;
-    build_signature(ctx, payload, TnxKeys, TnxMsg, TnxSig, data_to_send);
+    build_signature(payload, TnxKeys, TnxMsg, TnxSig, data_to_send);
 
     //send_transaction(data_to_send, command);
 
-    end = std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
-              << "[µs]" << std::endl;
-    clear_program(ctx);
+    // end = std::chrono::steady_clock::now();
+    // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
+    //           << "[µs]" << std::endl;
+    // clear_program(ctx);
+
     return 0;
 }
