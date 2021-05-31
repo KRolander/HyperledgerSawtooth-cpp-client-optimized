@@ -111,19 +111,19 @@ void buildIntkeyAddress(std::string txnFamily, std::string entryName, unsigned c
     }
     //now add the rest of the address: for intkey it is the 32bytes of the LSB of the sha512 of the key
     std::string entryName_hex_str = sha512Data(entryName);
-    std::cout << "First Here the extra string " << std::endl;
+    // std::cout << "First Here the extra string " << std::endl;
     std::cout << entryName_hex_str << std::endl;
     entryName_hex_str = entryName_hex_str.substr(entryName_hex_str.size() - 64, entryName_hex_str.size());
     unsigned char entryName_hex_char[32];
 
     hexStringToUint8_t((uint8_t *)entryName_hex_char, &entryName_hex_str[0], 32);
-    std::cout << "Here the extra string " << std::endl;
-    std::cout << entryName_hex_str << std::endl;
-    std::cout << "hexStringToUint8_t : " << std::endl; 
-    int k;
-    for(k=0; k<32; k++)
-        std::cout << std::hex << (uint32_t) entryName_hex_char[k] << ' ';
-    std::cout << std::endl; 
+    // std::cout << "Here the extra string " << std::endl;
+    // std::cout << entryName_hex_str << std::endl;
+    // std::cout << "hexStringToUint8_t : " << std::endl; 
+    // int k;
+    // for(k=0; k<32; k++)
+    //     std::cout << std::hex << (uint32_t) entryName_hex_char[k] << ' ';
+    // std::cout << std::endl; 
     
     // HexStrToUchar(entryName_hex_char, entryName_hex_str.c_str(), 64);
     //  std::cout << "HexStrToUchar : " << std::endl;
@@ -311,7 +311,7 @@ int sendData(std::string data, std::string api_endpoint)
 //     return 1;
 // }
 
-void SignTresor(uint8_t *hash, uint8_t *sig, uint8_t * privateKey ,int *recid)
+void SignTx(uint8_t *hash, uint8_t *sig, uint8_t * privateKey ,int *recid)
 {
     const ecdsa_curve *curve = &secp256k1;
     uint8_t py;

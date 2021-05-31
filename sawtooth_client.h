@@ -118,7 +118,7 @@ int sendData(std::string data, std::string api_endpoint);
 void printProtoJson(google::protobuf::Message &message);
 
 // ECDSA Signature with Trezor crypto library
-void SignTresor(uint8_t *hash, uint8_t *sig, uint8_t * privateKey, int *recid);
+void SignTx(uint8_t *hash, uint8_t *sig, uint8_t * privateKey, int *recid);
 
 // Convert uint8_t array to hexa string
 void singleBytes2hex(unsigned char *src, char *out);

@@ -195,7 +195,7 @@ void build_signature(json &payload,
     // HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
     
     int recid[1] = {0};
-    SignTresor((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
+    SignTx((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
     int i;
     std::cout << "Trezor Crypto signature Transaction: " << std::endl;
     std::cout << "r : " << std::endl;
@@ -265,7 +265,7 @@ void build_signature(json &payload,
     // HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
 
 
-    SignTresor((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
+    SignTx((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
 
 
     // CHECK(SECP256K1_API::secp256k1_ecdsa_sign(ctx, &TnxSig.signature, TnxMsg.message_hash_char, TnxKeys.privateKey, NULL, NULL) == 1); //make signature
