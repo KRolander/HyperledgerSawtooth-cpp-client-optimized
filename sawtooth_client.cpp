@@ -100,22 +100,46 @@ void buildIntkeyAddress(std::string txnFamily, std::string entryName, unsigned c
     //build prefix namespace: first set the first 3 bytes
     std::string txnFamily_hex_str = sha512Data(txnFamily);
     unsigned char txnFamily_hex_char[6];
-    HexStrToUchar(txnFamily_hex_char, txnFamily_hex_str.c_str(), 6);
+
+    hexStringToUint8_t(txnFamily_hex_char, &txnFamily_hex_str[0], 6);
+     
+
+    // HexStrToUchar(txnFamily_hex_char, txnFamily_hex_str.c_str(), 6);
     for (int i = 0; i < 3; i++)
     {
         ouput35bytes[i] = txnFamily_hex_char[i];
     }
     //now add the rest of the address: for intkey it is the 32bytes of the LSB of the sha512 of the key
     std::string entryName_hex_str = sha512Data(entryName);
+    std::cout << "First Here the extra string " << std::endl;
+    std::cout << entryName_hex_str << std::endl;
     entryName_hex_str = entryName_hex_str.substr(entryName_hex_str.size() - 64, entryName_hex_str.size());
-    unsigned char entryName_hex_char[64];
-    HexStrToUchar(entryName_hex_char, entryName_hex_str.c_str(), 64);
+    unsigned char entryName_hex_char[32];
+
+    hexStringToUint8_t((uint8_t *)entryName_hex_char, &entryName_hex_str[0], 32);
+    std::cout << "Here the extra string " << std::endl;
+    std::cout << entryName_hex_str << std::endl;
+    std::cout << "hexStringToUint8_t : " << std::endl; 
+    int k;
+    for(k=0; k<32; k++)
+        std::cout << std::hex << (uint32_t) entryName_hex_char[k] << ' ';
+    std::cout << std::endl; 
+    
+    // HexStrToUchar(entryName_hex_char, entryName_hex_str.c_str(), 64);
+    //  std::cout << "HexStrToUchar : " << std::endl;
+    // for(k=0; k<64; k++)
+    //     std::cout << std::hex << (uint32_t) entryName_hex_char[k] << " ";
+    // std::cout << std::endl;  
+
+    
     for (int i = 0; i < 32; i++)
     {
         ouput35bytes[3 + i] = entryName_hex_char[i];
     }
     //std::cout << "Address:" << UcharToHexStr(ouput35bytes, 35) << std::endl;
 }
+
+std::string here = "6e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7";
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
