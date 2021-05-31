@@ -123,6 +123,9 @@ void SignTresor(uint8_t *hash, uint8_t *sig, uint8_t * privateKey, int *recid);
 // Convert uint8_t array to hexa string
 void singleBytes2hex(unsigned char *src, char *out);
 
+// Convert uint8_t to hexString
+void bytes2hex(unsigned char *src, char *out, int len);
+
 // Convert hexa string to uint8_t array
 void hexStringToUint8_t(uint8_t *dest, const char *source, int bytes_n);
 

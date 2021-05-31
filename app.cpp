@@ -143,12 +143,25 @@ void build_signature(json &payload,
     size_t nonce_size = 10;
     unsigned char Transactionnonce[nonce_size];
     generateRandomBytes(Transactionnonce, nonce_size);
-    std::string TxnNonce = "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a";//UcharToHexStr(Transactionnonce, nonce_size);
+
+    // uint8_t tempChar[20] = {0x7a, 0x7a ,0x7a ,0x7a ,0x7a ,0x7a ,0x7a ,0x7a ,0x7a ,0x7a ,0x7a ,0x7a, 0x7a, 0x7a ,0x7a , 0x7a ,0x7a, 0x7a ,0x7a ,0x7a};
+    char charTxNonceArray[21]; // 10*2 + 1, double of Transactionnonce[nonce_size] 
+    bytes2hex((uint8_t *) Transactionnonce, charTxNonceArray, nonce_size);
+    std::string TxnNonce(charTxNonceArray);
+
+    // std::string TxnNonce = "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a";//UcharToHexStr(Transactionnonce, nonce_size);
 
     TnxMsg.message_hash_str = sha512Data(TnxMsg.message);
     unsigned char address[35];
     buildIntkeyAddress("intkey", payload["Name"].get<std::string>(), address);
-    const std::string address_str = UcharToHexStr(address, 35);
+    
+
+    char charAddressArray[71]; // 2*35 + 1, double of address[35]
+    bytes2hex(address, charAddressArray, 35);
+    
+    const std::string address_str(charAddressArray);
+
+    // const std::string address_str = UcharToHexStr(address, 35);
 
     //first build transaction
     //& add all necessary data to protos messages
@@ -219,7 +232,12 @@ void build_signature(json &payload,
     
     // std::cout << "Trezor serialized : " << serializedSignatureTrezorFirst << std::endl;
 
-    TnxSig.signature_serilized_str = UcharToHexStr(TnxSig.signature_serilized, SIGNATURE_SERILIZED_SIZE);
+    char charSignatureSerializedArray[129]; // SIGNATURE_SERILIZED_SIZE*2 + 1 , double of address[35]
+    bytes2hex(TnxSig.signature_serilized, charSignatureSerializedArray, SIGNATURE_SERILIZED_SIZE);
+    
+    std::string tmpSignatureSerialized(charSignatureSerializedArray);
+    TnxSig.signature_serilized_str = tmpSignatureSerialized;
+    // TnxSig.signature_serilized_str = UcharToHexStr(TnxSig.signature_serilized, SIGNATURE_SERILIZED_SIZE);
     std::cout << "Trezor serialized : " << TnxSig.signature_serilized_str << std::endl;
    
 
@@ -270,7 +288,14 @@ void build_signature(json &payload,
     // std::string serializedSigTrezor = UcharToHexStr(signatureTrezor, SIGNATURE_SERILIZED_SIZE);
     // std::cout << "Trezor serialized : " << serializedSigTrezor << std::endl;
 
-    TnxSig.signature_serilized_str = UcharToHexStr(TnxSig.signature_serilized, SIGNATURE_SERILIZED_SIZE);
+
+    char charSignatureSerializedArray_v2[129]; // SIGNATURE_SERILIZED_SIZE*2 + 1 , double of address[35]
+    bytes2hex(TnxSig.signature_serilized, charSignatureSerializedArray_v2, SIGNATURE_SERILIZED_SIZE);
+    
+    std::string tmpSignatureSerialized_v2(charSignatureSerializedArray_v2);
+    TnxSig.signature_serilized_str = tmpSignatureSerialized_v2;
+
+    // TnxSig.signature_serilized_str = UcharToHexStr(TnxSig.signature_serilized, SIGNATURE_SERILIZED_SIZE);
     std::cout << "Trezor serialized : " << TnxSig.signature_serilized_str << std::endl;
 
     myBatch->set_header_signature(TnxSig.signature_serilized_str);
@@ -280,18 +305,18 @@ void build_signature(json &payload,
     // std::string data_to_send_full_serialized
 
 
-    size_t dataSize = myBatchList.ByteSizeLong(); 
-    uint32_t tabData[dataSize];
+    // size_t dataSize = myBatchList.ByteSizeLong(); 
+    // uint32_t tabData[dataSize];
 
-    myBatchList.SerializeToArray(tabData, dataSize);
-    std::cout << "***Done build transaction***" << std::endl;
-    std::cout << " Transaction to send : " << std::endl;
-    // std::cout << data_to_send_full_serialized << std::endl;
-    for(i=0; i<dataSize; i++)
-    {
-        std::cout << std::hex << (uint32_t) tabData[i] << " ";
-    }
-    std::cout << std::endl;
+    // myBatchList.SerializeToArray(tabData, dataSize);
+    // std::cout << "***Done build transaction***" << std::endl;
+    // std::cout << " Transaction to send : " << std::endl;
+    // // std::cout << data_to_send_full_serialized << std::endl;
+    // for(i=0; i<dataSize; i++)
+    // {
+    //     std::cout << std::hex << (uint32_t) tabData[i] << " ";
+    // }
+    // std::cout << std::endl;
 
 }
 
