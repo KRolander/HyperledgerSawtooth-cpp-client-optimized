@@ -90,8 +90,16 @@ void init_transaction(json &payload,
 
     // TODO with trezor crypto
     
-    HexStrToUchar(TnxKeys.privateKey, TnxKeys.privKey.c_str(), PRIVATE_KEY_SIZE);
-    HexStrToUchar(TnxKeys.publicKey_serilized, TnxKeys.pubKey.c_str(), PUBLIC_KEY_SERILIZED_SIZE);
+
+
+    hexStringToUint8_t(TnxKeys.privateKey, &TnxKeys.privKey[0], PRIVATE_KEY_SIZE);
+
+    //HexStrToUchar(TnxKeys.privateKey, TnxKeys.privKey.c_str(), PRIVATE_KEY_SIZE);
+    
+    hexStringToUint8_t(TnxKeys.publicKey_serilized, &TnxKeys.pubKey[0], PUBLIC_KEY_SERILIZED_SIZE);
+    
+    
+    // HexStrToUchar(TnxKeys.publicKey_serilized, TnxKeys.pubKey.c_str(), PUBLIC_KEY_SERILIZED_SIZE);
 
     // if (LOAD_DEFAULT_KEYS)
     // {
@@ -165,7 +173,13 @@ void build_signature(json &payload,
     TnxMsg.message_hash_str = sha256Data(myTransactionHeader_string);
     if (VERBOSE)
         std::cout << "message_hash_str: " << TnxMsg.message_hash_str << std::endl;
-    HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
+
+
+    hexStringToUint8_t(TnxMsg.message_hash_char, &TnxMsg.message_hash_str[0], HASH_SHA256_SIZE);
+
+
+
+    // HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
     
     int recid[1] = {0};
     SignTresor((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
@@ -226,8 +240,11 @@ void build_signature(json &payload,
 
     std::cout << "Signing batch header..." << std::endl;
     TnxMsg.message_hash_str = sha256Data(myBatchHeader_string);
-    HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
 
+
+    hexStringToUint8_t(TnxMsg.message_hash_char, &TnxMsg.message_hash_str[0], HASH_SHA256_SIZE);
+
+    // HexStrToUchar(TnxMsg.message_hash_char, TnxMsg.message_hash_str.c_str(), (size_t)HASH_SHA256_SIZE);
 
 
     SignTresor((uint8_t *) TnxMsg.message_hash_char, TnxSig.signature_serilized, (uint8_t*) TnxKeys.privateKey , recid);
