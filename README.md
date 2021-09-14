@@ -7,6 +7,7 @@ I profile this program to have an overview of the most required functions used i
 
 The digital signatures of the signatures and batches can be done by using Trezor-Crypto or Secp256k1 libraries. This project uses Trezor-Crypto as default library for signatures (it is a more optimal choice for IoT devices). 
 
+In arm-cross-compile file you find a dedicated Makefile and guide for ARM cross-compile.
 
 Please make an issue for questions or errors.
 
