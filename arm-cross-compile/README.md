@@ -51,14 +51,14 @@ You can find all of the instructions [Here](https://www.cryptopp.com/wiki/ARM_Em
 
 
 
-# Compile secp256k1 for ARM architecture
+# Compile secp256k1 for ARM architecture
 
 ```bash
 cd secp256k1
 ./configure CC=arm-linux-gnueabi-gcc-5 --host=arm --enable-exhaustive-tests=no
 ```
 
-# Compile Trezor-Crypto for ARM architecture
+# Compile Trezor-Crypto for ARM architecture
 
 ```bash
 cd trezorCrypto
