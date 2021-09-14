@@ -5,6 +5,9 @@ This program aims to demonstrate that it is possible to run a client application
 
 I profile this program to have an overview of the most required functions used in an Hyperledger Sawtooth client application.
 
+The digital signatures of the signatures and batches can be done by using Trezor-Crypto or Secp256k1 libraries. This project uses Trezor-Crypto as default library for signatures (it is a more optimal choice for IoT devices). 
+
+
 Please make an issue for questions or errors.
 
 ## Requirements: 
@@ -29,6 +32,17 @@ make
 cd ..
 
 ```
+
+
+Make Trezor-Crypto:
+```bash
+
+cd trezorCrypto/
+make
+cd ..
+
+```
+
 
 Make protobuf:
 ```
@@ -57,7 +71,7 @@ make
 Here is a simple description of the steps inside the program:
 
 - [x] init transaction
-- [x] build transaction (using protobuf) & sign transaction (secp256k1)
+- [x] build transaction (using protobuf) & sign transaction (secp256k1 or Trezor-Crypto)
 - [x] push_transaction
 
 *Checked items are currently done.
@@ -76,7 +90,10 @@ valgrind --tool=callgrind ./app --push inc
 kcachegrind <previous file output>
 ```
 
-![profiling image](./profiling/push_tnx_pretty.png "icon")
+
+This is the call graph of the transaction creation, the sending phase is not included.
+
+![profiling image](./profiling/CallGraphHyperledgerSawtoothy.png "icon")
 
 ### with gperftools/pperf
 
