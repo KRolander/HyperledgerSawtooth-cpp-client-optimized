@@ -359,7 +359,7 @@ int main(int argc, char **argv)
     std::string data_to_send;
     build_signature(payload, TnxKeys, TnxMsg, TnxSig, data_to_send);
 
-    //send_transaction(data_to_send, command);
+    send_transaction(data_to_send, command);
 
     // end = std::chrono::steady_clock::now();
     // std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
