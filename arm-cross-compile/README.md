@@ -10,11 +10,15 @@ It must be noted that all of the cross-compiled librarires (libx.a) must be copi
 
 Compile to obtain a static library (libcurl.a)
 
-
 ```bash
+wget http://curl.haxx.se/download/curl-7.37.1.tar.gz
+tar xzf curl-7.37.1.tar.gz
+mv  curl-7.37.1 curl
 cd curl
 ./configure --prefix=${WORK_SPACE}/build CC=arm-linux-gnueabi-gcc-7 --host=arm-linux-gnueabi --disable-shared --enable-static
 ```
+
+
 
 
 
